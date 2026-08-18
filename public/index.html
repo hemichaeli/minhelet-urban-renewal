@@ -161,58 +161,6 @@
     cursor: pointer;
   }
 
-  .config-bar {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    box-shadow: var(--shadow);
-  }
-  .config-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .config-row + .config-row { margin-top: 8px; }
-  .config-bar label {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-2);
-    white-space: nowrap;
-    min-width: 100px;
-  }
-  .config-bar input {
-    flex: 1;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 7px 10px;
-    font-size: 13px;
-    font-family: monospace;
-    color: var(--text-1);
-    background: var(--surface-2);
-    direction: ltr;
-    text-align: left;
-  }
-  .config-bar input:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-light);
-  }
-  .config-bar .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--text-3);
-    flex-shrink: 0;
-  }
-  .config-bar .dot.connected { background: var(--green); }
-  .config-hint {
-    font-size: 11px;
-    color: var(--text-3);
-    margin-top: 6px;
-    padding-right: 18px;
-  }
 
   .submit-area {
     text-align: center;
@@ -397,19 +345,6 @@
 
 <div class="container">
 
-  <div class="config-bar">
-    <div class="config-row">
-      <div class="dot" id="statusDotLead"></div>
-      <label>ליד Webhook:</label>
-      <input type="text" id="webhookUrlLead" placeholder="https://your-n8n.example.com/webhook/manual-lead" dir="ltr">
-    </div>
-    <div class="config-row">
-      <div class="dot" id="statusDotDeal"></div>
-      <label>עסקה Webhook:</label>
-      <input type="text" id="webhookUrlDeal" placeholder="https://your-n8n.example.com/webhook/deal-analyzer" dir="ltr">
-    </div>
-    <div class="config-hint">הזן את כתובות ה-Webhook של n8n. ההגדרות נשמרות אוטומטית.</div>
-  </div>
 
   <!-- ===== LEAD ANALYZER TAB ===== -->
   <div class="tab-content active" id="tab-lead">
@@ -581,11 +516,11 @@
       <div class="card" style="background: var(--deal-light); border-color: var(--deal-accent);">
         <div class="card-title" style="color: var(--deal-accent); border-color: rgba(26,74,110,0.2);">מה הניתוח כולל</div>
         <div style="font-size: 13px; color: var(--text-2); line-height: 1.8;">
-          <div>&#9678; תוכניות בניין עיר (תב"ע) החלות על המגרש</div>
+          <div>&#9678; תוכניות בניין עיר (תב\"ע) החלות על המגרש</div>
           <div>&#9678; זכויות בנייה קיימות ויתרות</div>
           <div>&#9678; פרויקטים סמוכים ברדיוס 500 מטר + שם היזם</div>
           <div>&#9678; יזמים פעילים באזור ומוניטין</div>
-          <div>&#9678; מסלול התחדשות מומלץ (תמ"א 38 / פינוי בינוי)</div>
+          <div>&#9678; מסלול התחדשות מומלץ (תמ\"א 38 / פינוי בינוי)</div>
           <div>&#9678; ניתוח כלכלי: שווי, עלות, רווח יזם ומארגן</div>
           <div>&#9678; מדיניות עירונית ותמריצים</div>
           <div>&#9678; סיכונים ומכשולים</div>
@@ -607,14 +542,8 @@
 
 <script>
 (function() {
-  var LEAD_KEY = 'n8n_webhook_url';
-  var DEAL_KEY = 'n8n_webhook_deal_url';
-
-  // Elements
-  var urlLead = document.getElementById('webhookUrlLead');
-  var urlDeal = document.getElementById('webhookUrlDeal');
-  var dotLead = document.getElementById('statusDotLead');
-  var dotDeal = document.getElementById('statusDotDeal');
+  var WEBHOOK_LEAD = 'https://hemichaeli.app.n8n.cloud/webhook/manual-lead';
+  var WEBHOOK_DEAL = 'https://hemichaeli.app.n8n.cloud/webhook/deal-analyzer';
 
   // Tab switching
   document.querySelectorAll('.tab-btn').forEach(function(btn) {
@@ -624,25 +553,6 @@
       btn.classList.add('active');
       document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     });
-  });
-
-  // Storage helpers
-  function sGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
-  function sSet(k,v) { try { localStorage.setItem(k, v); } catch(e) {} }
-
-  // Restore saved URLs
-  var savedLead = sGet(LEAD_KEY);
-  var savedDeal = sGet(DEAL_KEY);
-  if (savedLead) { urlLead.value = savedLead; dotLead.classList.add('connected'); }
-  if (savedDeal) { urlDeal.value = savedDeal; dotDeal.classList.add('connected'); }
-
-  urlLead.addEventListener('input', function() {
-    sSet(LEAD_KEY, urlLead.value.trim());
-    dotLead.classList.toggle('connected', urlLead.value.trim().length > 10);
-  });
-  urlDeal.addEventListener('input', function() {
-    sSet(DEAL_KEY, urlDeal.value.trim());
-    dotDeal.classList.toggle('connected', urlDeal.value.trim().length > 10);
   });
 
   // ===== LEAD ANALYZER =====
@@ -675,8 +585,7 @@
 
   leadForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    var url = urlLead.value.trim();
-    if (!url) { alert('יש להזין את כתובת ה-Webhook של ניתוח ליד'); urlLead.focus(); return; }
+    var url = WEBHOOK_LEAD;
     var data = collectLeadData();
 
     resultAreaLead.style.display = 'block';
@@ -727,7 +636,6 @@
   var dropZone = document.getElementById('fileDropZone');
   var selectedFiles = [];
 
-  // File upload management
   function formatSize(bytes) {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
@@ -752,7 +660,7 @@
 
   function addFiles(files) {
     var maxFiles = 5;
-    var maxSize = 10 * 1024 * 1024; // 10MB
+    var maxSize = 10 * 1024 * 1024;
     for (var i = 0; i < files.length; i++) {
       if (selectedFiles.length >= maxFiles) {
         alert('ניתן לצרף עד ' + maxFiles + ' קבצים');
@@ -772,7 +680,6 @@
     dealFilesInput.value = '';
   });
 
-  // Drag and drop
   ['dragenter', 'dragover'].forEach(function(ev) {
     dropZone.addEventListener(ev, function(e) { e.preventDefault(); e.stopPropagation(); dropZone.classList.add('drag-over'); });
   });
@@ -799,8 +706,7 @@
 
   dealForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    var url = urlDeal.value.trim();
-    if (!url) { alert('יש להזין את כתובת ה-Webhook של ניתוח עסקה'); urlDeal.focus(); return; }
+    var url = WEBHOOK_DEAL;
 
     resultAreaDeal.style.display = 'block';
     resultCardDeal.className = 'result-card loading deal-loading';
@@ -812,7 +718,6 @@
     try {
       var resp;
       if (selectedFiles.length > 0) {
-        // Send as multipart/form-data when files are attached
         var fd = new FormData();
         var formFd = new FormData(dealForm);
         for (var pair of formFd.entries()) {
@@ -824,7 +729,6 @@
         }
         resp = await fetch(url, { method: 'POST', body: fd });
       } else {
-        // Send as JSON when no files
         var formFd2 = new FormData(dealForm);
         var data = {};
         for (var pair2 of formFd2.entries()) {
